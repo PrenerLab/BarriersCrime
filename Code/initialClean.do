@@ -94,7 +94,7 @@ replace adjustment = "0" if adjustment != "1"
 destring adjustment, replace
 label define adjustment 0 "No" 1 "Yes"
 label values adjustment adjustment
-label variable adjustment "Later change in crime classification"
+label variable adjustment "Later changed in crime classification"
 note adjustment: Binary variable derived from AdministrativeAdjustmentIndicator
 
 //label address variables with explanations

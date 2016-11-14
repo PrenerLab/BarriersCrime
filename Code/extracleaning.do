@@ -49,15 +49,15 @@ label define ucr 1 "Homicide" 2 "Sexual Assault" 3 "Robbery" ///
 	label values ucr ucr
 	label variable ucr "UCR crime code"
 	note ucr: Extracted from Crime variable
-	
-//rename and notate other variables
-rename dateoccurred1 dateoccurred
-label variable dateoccurred "Date Crime Occurred"
-note dateoccurred:Converted to STATA format from original dateoccurred var
 
-rename timeoccurred3 timeoccurred
-label variable timeoccurred "Time Crime Occured"
-note timeoccurred: Coded from orginal timeoccurred variable
+//rename and notate other variables
+//rename dateoccurred1 dateoccurred
+//label variable dateoccurred "Date Crime Occurred"
+//note dateoccurred:Converted to STATA format from original dateoccurred var
+
+//rename timeoccurred3 timeoccurred
+//label variable timeoccurred "Time Crime Occured"
+//note timeoccurred: Coded from orginal timeoccurred variable
 
 label variable ucr_other_num "Last four digits of crime code"
 
@@ -67,7 +67,7 @@ note _source: Automatically populated during the append process
 
 //generate new variables, parsing out date occurred
 gen year_occurred = year(dateoccurred)
-label variable year_occurred "year crime occurred" 
+label variable year_occurred "year crime occurred"
 note year_occurred: extracted from dateoccurred variable
 
 gen month_occurred = month(dateoccurred)
@@ -75,7 +75,7 @@ label variable month_occurred "month crime occurred"
 note month_occurred: extracted from dateoccurred variable
 
 gen day_occurred = day(dateoccurred)
-label variable day_occurred "day crime occurred" 
+label variable day_occurred "day crime occurred"
 note day_occurred: extracted from the dateoccurred variable
 
 
@@ -99,7 +99,3 @@ drop crime_str //redundant string version of variable crime
 
 rename locationname location_name
 rename locationcomment location_comment
-
-	
-	
-	

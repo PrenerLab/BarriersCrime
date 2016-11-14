@@ -5,26 +5,30 @@ set more off
 // ==========================================================================
 
 /*
-This .do file demonstrates the use of nested loops to clean and 
+This .do file demonstrates the use of nested loops to clean and
 append time series data. It relies on three folders existing on
 your desktop:
 	- Raw Data, which should contain the appropriate excel files
 	- Clean Data
 	- Full Data
 
+
+subordinates:
+ 	initialClean.do
+
+
 This .do file is only compatable with OS X.
 */
 
 // ==========================================================================
 
-local raw "/Users/`c(username)'/Desktop/Raw Data"
-local clean "/Users/`c(username)'/Desktop/Clean Data"
-local full "/Users/`c(username)'/Desktop/Full Data"
+local raw "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Raw Data"
+local clean "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Clean Data"
+local full "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Full Data"
 
 // ==========================================================================
 
-log using "`full'/nestedloop.txt", text replace
-
+cd "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/"
 // ==========================================================================
 
 // set local variables
@@ -34,21 +38,34 @@ local months "January February March April May June July August September Octobe
 
 // ==========================================================================
 
+// make clean and full data directories
+capture confirm file "`clean'" // check if `name' subdir exists
+if _rc { // _rc will be >0 if it doesn't exist
+    mkdir "`clean'"
+    }
+
+capture confirm file "`full'" // check if `name' subdir exists
+		if _rc { // _rc will be >0 if it doesn't exist
+		    mkdir "`full'"
+		    }
+
+// ==========================================================================
 // import excel files, confirm numeric data, and save as a .dta file
 
 foreach year in `years' {
 
 	foreach month in `months' {
 		insheet using "`raw'/`month'`year'.csv" //firstrow
-		
-		do initial_clean.do
-	
+
+		do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/initialClean.do"
+		do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/extracleaning.do"
+
 		confirm numeric variable month
 		confirm numeric variable year
-		
-			
+
+
 		save "`clean'/`month'`year'.dta", replace
-		
+
 		clear
 	}
 
@@ -57,7 +74,7 @@ foreach year in `years' {
 
 // ==========================================================================
 
-// create empty dataset 
+// create empty dataset
 
 local x : word 1 of `months'
 local y : word 1 of `years'
@@ -85,7 +102,7 @@ foreach year in `years' {
 //give every row unique ID variable
 
 gen id = _n
-order id year month dateoccurred1 timeoccurred3 newcrime unfounded adjustment, first
+order id year month dateoccurred timeoccurred3 newcrime unfounded adjustment, first
 order dateoccurred timeoccurred _source, last
 
 // ==========================================================================
