@@ -58,7 +58,7 @@ foreach year in `years' {
 		insheet using "`raw'/`month'`year'.csv" //firstrow
 
 		do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/initialClean.do"
-		do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/extracleaning.do"
+		//do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/extracleaning.do"
 
 		confirm numeric variable month
 		confirm numeric variable year
@@ -99,26 +99,27 @@ foreach year in `years' {
 
 // ==========================================================================
 
+//label and notate source variable in the final document
+label variable _source "Source document"
+note _source: Automatically populated during the append process
+
+// ==========================================================================
 //give every row unique ID variable
 
 gen id = _n
-order id year month dateoccurred timeoccurred3 newcrime unfounded adjustment, first
-order dateoccurred timeoccurred _source, last
-
-// ==========================================================================
-
-//Convert dates into STATA dates
-gen date2 = date(date, "MDY")
-format date2 %td
-rename date2 dateoccurred1
+order id dateOccurred yearOccurred monthOccurred dayOccurred timeOccurred ///
+	month year ucr crime description newCrime unfounded adjustment count ///
+	district neighborhood ileadsaddress ileadsstreet ///
+	cadaddress cadstreet locationName locationComment ///
+	xcoord ycoord insample _source, first
 
 
 // ==========================================================================
-//covert time occurred into integers
-split timeoccurred, parse(:)
-gen timeoccurred3 = timeoccurred1+timeoccurred2
-destring timeoccurred3, replace
-drop timeoccurred1 timeoccurred2
+
+
+
+
+// ==========================================================================
 
 // ==========================================================================
 
@@ -131,7 +132,7 @@ tabulate _source
 
 // ==========================================================================
 
-log close
+//log close
 
 // ==========================================================================
 

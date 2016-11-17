@@ -8,3 +8,6 @@ Repository created with .gitignore, README.md, and researchLog.md files added.
 
 ### 28 Oct 2016 - TAYLOR
 Added all data to repository. This includes a folder for the raw data, dta files for each data month, and a full data file that has a merged dataset from 2008-2015, as well as excel files that have every crime for each individual cur code. Folders for code and documentation are also included. 
+
+### 17 Nov 2016 - TAYLOR
+Updated the code so that it's cleaner and enhances automation. I may make further changes to the code going forward, for organizational purposes. Regardless, necessary files for ArcGIS work are in place going forward.

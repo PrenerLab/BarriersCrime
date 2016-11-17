@@ -24,11 +24,11 @@ set linesize 80
 /*
 file name - export_excel.do
 project name -	Street Barriers - STL Crime Data
-                                                                                 
+
 purpose - Export components of STL crime data into individual XLS files
 
 created - 15 Feb 2016
-updated - 15 Feb 2016
+updated - 17 Nov 2016
 
 author - Taylor Braswell
 */
@@ -63,11 +63,10 @@ none
 // ==========================================================================
 // ==========================================================================
 
-cd "/Users/tbraswell/Desktop/Full Data"
+cd "/Users/tbraswell/Documents/streetBarriers/BarriersCrime/Full Data"
 
 use stlcrime.dta
 
-cd "/Users/tbraswell/Desktop/Full Data/excel" //where files will be saved
 
 
 // ==========================================================================
@@ -320,3 +319,8 @@ drop if ucr != 26
 export excel using stlcrime_ucr_26.xlsx, sheet("Other Offenses") ///
 	firstrow(variables) nolabel replace
 clear
+
+//=============================================================================
+//remove unneeded directory
+
+erase "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Clean Data"
