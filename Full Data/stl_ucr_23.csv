@@ -1,0 +1,3 @@
+id,dateOccurred,yearOccurred,monthOccurred,dayOccurred,timeOccurred,month,year,ucr,crime,description,newCrime,unfounded,adjustment,count,district,neighborhood,ileadsaddress,ileadsstreet,cadaddress,cadstreet,locationName,locationComment,xcoord,ycoord,insample,_source
+63596,01feb2000,2000,2,1,700,December,2008,Intoxication,230000,DRUNKENNESS,Yes,No,No,1,6,69,4633,CARTER AVE,4633,CARTER,,,895279.63,1036790,0,December2008.dta
+72806,01feb2000,2000,2,1,700,January,2009,Intoxication,230000,DRUNKENNESS,No,No,Yes,-1,6,69,4633,CARTER AVE,4633,CARTER,,,895279.63,1036790,0,January2009.dta

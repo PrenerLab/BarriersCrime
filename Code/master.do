@@ -24,4 +24,7 @@ do crimeMerge.do
  
  
 //WARNING: Executing export_excel.do may take multiple minutes 
-do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_excel.do"
+//do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_excel.do"
+
+//export csv
+do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_csv.do"

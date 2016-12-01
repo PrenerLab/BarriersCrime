@@ -323,4 +323,4 @@ clear
 //=============================================================================
 //remove unneeded directory
 
-erase "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Clean Data"
+shell rm -R "Clean Data"

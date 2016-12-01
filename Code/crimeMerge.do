@@ -41,12 +41,12 @@ local months "January February March April May June July August September Octobe
 // make clean and full data directories
 capture confirm file "`clean'" // check if `name' subdir exists
 if _rc { // _rc will be >0 if it doesn't exist
-    mkdir "`clean'"
+    mkdir "`clean'", public
     }
 
 capture confirm file "`full'" // check if `name' subdir exists
 		if _rc { // _rc will be >0 if it doesn't exist
-		    mkdir "`full'"
+		    mkdir "`full'", public
 		    }
 
 // ==========================================================================
