@@ -18,7 +18,7 @@ try:
     save_Name = "ucr02"
 
     # Set the spatial reference
-    spRef = r"Coordinate Systems\Projected Coordinate Systems\State Plane\NAD 1983 (Meters)\NAD 1983 StatePlane Missouri East FIPS 2401 (Meters).prj"
+    spRef = r"Coordinate Systems\Projected Coordinate Systems\State Plane\NAD 1983 (US Feet)\NAD 1983 StatePlane Missouri East FIPS 2401 (US Feet).prj"
 
     # Make the XY event layer...
     arcpy.MakeXYEventLayer_management(in_Table, x_coords, y_coords, out_Layer, spRef)
