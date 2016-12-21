@@ -63,7 +63,7 @@ none
 // ==========================================================================
 // ==========================================================================
 
-cd "/Users/tbraswell/Documents/streetBarriers/BarriersCrime/Full Data"
+cd "/Users/thbraswell/Documents/Barriers/BarriersCrime/Full Data"
 
 use stlcrime.dta
 
@@ -286,6 +286,12 @@ clear
 use stlcrime.dta
 drop if ucr != 26
 export delimited using stl_ucr_26.csv, replace
+clear
+
+//Missing UTM Coordinates
+use stlcrime.dta
+keep if xcoord == 0 & ycoord == 0
+export delimited using stl_missing.csv, replace
 clear
 
 //=============================================================================

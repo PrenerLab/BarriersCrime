@@ -16,7 +16,7 @@ Author: Taylor
 //=============================================================================
 
 //Change to code directory
-cd "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code"
+cd "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Code/Stata"
 
 //do file stack
 do crimeMerge.do
@@ -27,4 +27,4 @@ do crimeMerge.do
 //do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_excel.do"
 
 //export csv
-do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_csv.do"
+do "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Code/Stata/export_csv.do"

@@ -22,13 +22,13 @@ This .do file is only compatable with OS X.
 
 // ==========================================================================
 
-local raw "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Raw Data"
-local clean "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Clean Data"
-local full "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Full Data"
+local raw "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Raw Data"
+local clean "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Clean Data"
+local full "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Full Data"
 
 // ==========================================================================
 
-cd "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/"
+cd "/Users/`c(username)'/Documents/Barriers/BarriersCrime/"
 // ==========================================================================
 
 // set local variables
@@ -57,7 +57,7 @@ foreach year in `years' {
 	foreach month in `months' {
 		insheet using "`raw'/`month'`year'.csv" //firstrow
 
-		do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/initialClean.do"
+		do "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Code/Stata/initialClean.do"
 		//do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/extracleaning.do"
 
 		confirm numeric variable month
