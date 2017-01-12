@@ -1,12 +1,13 @@
 # This file will loop over every crime .xlsx file, project their coordinates
 # and export them as individual shapefiles.
 
-# Import arcpy
+# Import libraries
+import glob
 import arcpy
 import os
 
 # set working environment
-arcpy.env.workspace = r"C:\Users\thbraswell\Desktop\BarriersCrime\Full Data"
+arcpy.env.workspace = r"C:\Users\thbraswell\Documents\BarriersCrime\Full Data"
 
 def derive_save_name(filename):
     filename = os.path.splitext(filename)[0]
@@ -17,7 +18,7 @@ def derive_save_name(filename):
         except ValueError:
             raise Exception('invalid filename' + filename)
         return 'ucr' + ucr
-    else if (filename.startswith('stlcrime_')):
+    elif (filename.startswith('stlcrime_')):
         year = filename.split('_')[-1]
         if len(year) != 4:
             raise Exception('invalid filename' + filename)
@@ -26,17 +27,22 @@ def derive_save_name(filename):
         except ValueError:
             raise Exception('invalid filename' + filename)
         return 'crime' + year
-    else
+    else:
         raise Exception('invalid filename' + filename)
 
 base_directory = arcpy.env.workspace
 glob_pattern = "stl_*.csv"
-for full_path in os.listdir(base_directory + "\\" + glob_pattern):
+i = 0
+
+for full_path in glob.glob(base_directory + "\\" + glob_pattern):
     try:
+        #Counter Up
+        i = i + 1
+
         in_Table = full_path
         x_coords = "xcoord"
         y_coords = "ycoord"
-        out_Layer = "stlCrime01_layer"
+        out_Layer = 'stlCrime' + str(i)
         save_Path = r"C:\Users\thbraswell\Desktop\BarriersCrime\Spatial\crime.gdb"
         save_Name = derive_save_name(os.path.basename(full_path))
 
@@ -51,5 +57,6 @@ for full_path in os.listdir(base_directory + "\\" + glob_pattern):
 
         # Save to a layer file
         arcpy.FeatureClassToFeatureClass_conversion(out_Layer, save_Path, save_Name)
+
     except Exception as err:
         print(err.args[0])
