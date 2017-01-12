@@ -1,4 +1,4 @@
-# This file will loop over every crime .xlsx file, project their coordinates
+# This file will loop over every crime .csv file, project their coordinates
 # and export them as individual shapefiles.
 
 # Import libraries
@@ -10,28 +10,31 @@ import os
 arcpy.env.workspace = r"C:\Users\thbraswell\Documents\BarriersCrime\Full Data"
 
 def derive_save_name(filename):
-    filename = os.path.splitext(filename)[0]
-    if (filename.startswith('stl_ucr_')):
-        ucr = filename.split('_')[-1]
+    filename = os.path.splitext(filename)[0] #grab filename without extension
+    if (filename.startswith('stl_ucr_')): #ucr files
+        ucr = filename.split('_')[-1] #ucr = ucr code number
         try:
-            int(ucr)
+            int(ucr) #verify ucr variable is an integer
         except ValueError:
             raise Exception('invalid filename' + filename)
-        return 'ucr' + ucr
-    elif (filename.startswith('stlcrime_')):
-        year = filename.split('_')[-1]
-        if len(year) != 4:
+        return 'ucr' + ucr #this will be the save name of each ucr output file from Arc
+    elif (filename.startswith('stlcrime_')): #year files
+        year = filename.split('_')[-1] #year = four digit year YYYY
+        if len(year) != 4: #verify year has four digits
             raise Exception('invalid filename' + filename)
         try:
-            int(year)
+            int(year) #verify year is an integer
         except ValueError:
             raise Exception('invalid filename' + filename)
-        return 'crime' + year
+        return 'crime' + year #this will be the save name of each year output file from Arc
     else:
         raise Exception('invalid filename' + filename)
 
+# Define pathway for the loop
 base_directory = arcpy.env.workspace
 glob_pattern = "stl_*.csv"
+
+#Create counter for out layer in the loop
 i = 0
 
 for full_path in glob.glob(base_directory + "\\" + glob_pattern):
