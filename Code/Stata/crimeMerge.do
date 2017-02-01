@@ -104,6 +104,11 @@ label variable _source "Source document"
 note _source: Automatically populated during the append process
 
 // ==========================================================================
+//drop if count = -1
+drop if count == -1
+
+//drop if year occurred prior to 2008
+drop if yearOccurred < 2008
 //give every row unique ID variable
 
 gen id = _n
@@ -111,7 +116,7 @@ order id dateOccurred yearOccurred monthOccurred dayOccurred timeOccurred ///
 	month year ucr crime description newCrime unfounded adjustment count ///
 	district neighborhood ileadsaddress ileadsstreet ///
 	cadaddress cadstreet locationName locationComment ///
-	xcoord ycoord insample _source, first
+	xcoord ycoord _source, first
 
 
 // ==========================================================================

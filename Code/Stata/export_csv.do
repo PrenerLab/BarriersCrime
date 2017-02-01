@@ -68,7 +68,21 @@ cd "/Users/thbraswell/Documents/Barriers/BarriersCrime/Full Data"
 use stlcrime.dta
 
 
+//Create good and bad data files
+//Good Data
+use stlcrime.dta
+keep if xcoord != 0 & ycoord != 0
+export delimited using goodData.csv, replace
+clear
 
+//Bad Data
+use stlcrime.dta
+keep if xcoord == 0 & ycoord == 0
+export delimited using badData.csv, replace
+clear
+
+/* Commenting out this part until worked through geocoding issues.
+It may become its own separate stata process.
 // ==========================================================================
 
 //Create year files
@@ -288,13 +302,9 @@ drop if ucr != 26
 export delimited using stl_ucr_26.csv, replace
 clear
 
-//Missing UTM Coordinates
-use stlcrime.dta
-keep if xcoord == 0 & ycoord == 0
-export delimited using stl_missing.csv, replace
-clear
 
+*/
 //=============================================================================
 //remove unneeded directory
 
-shell rm -R "Clean Data"
+shell rm -R "/Users/thbraswell/Documents/Barriers/BarriersCrime/Clean Data"
