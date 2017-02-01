@@ -11,3 +11,6 @@ Added all data to repository. This includes a folder for the raw data, dta files
 
 ### 17 Nov 2016 - TAYLOR
 Updated the code so that it's cleaner and enhances automation. I may make further changes to the code going forward, for organizational purposes. Regardless, necessary files for ArcGIS work are in place going forward.
+
+### 1 Feb 2017 - TAYLOR
+Streamlined process for handling missing police data. After geocoding the matched ileads and cad addresses, I appended the matched ones to the good data (saved under "betterData.csv". The rest of the data requires manual attention and is located under "Working Data -> Manual Attention". 
