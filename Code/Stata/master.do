@@ -22,9 +22,6 @@ cd "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Code/Stata"
 do crimeMerge.do
   //does initialClean.do
  
- 
-//WARNING: Executing export_excel.do may take multiple minutes 
-//do "/Users/`c(username)'/Documents/streetBarriers/BarriersCrime/Code/export_excel.do"
 
 //export csv
 do "/Users/`c(username)'/Documents/Barriers/BarriersCrime/Code/Stata/export_csv.do"

@@ -207,24 +207,3 @@ note dayOccurred: extracted from the dateOccurred variable
 drop dateOccurred
 rename dateOccurred1 dateOccurred
 
-//===================================================================
-
-//insample out crimes that occurred before 2008
-
-generate insample = .
-replace insample = 0 if yearOccurred < 2008
-replace insample = 1 if yearOccurred >= 2008
-label variable insample "0 if crime occurred before 2008"
-note insample: 2008 is the starting point in the data
-
-//===================================================================
-/*
-//rename and notate other variables
-rename dateoccurred1 dateoccurred
-label variable dateoccurred "Date Crime Occurred"
-note dateoccurred:Converted to STATA format from original dateoccurred var
-
-rename timeoccurred3 timeoccurred
-label variable timeoccurred "Time Crime Occured"
-note timeoccurred: Coded from orginal timeoccurred variable
-*/
