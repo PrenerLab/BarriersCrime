@@ -72,13 +72,13 @@ use stlcrime.dta
 //Good Data
 use stlcrime.dta
 keep if xcoord != 0 & ycoord != 0
-export delimited using goodData.csv, replace
+export delimited using goodData.csv, replace nolabel
 clear
 
 //Bad Data
 use stlcrime.dta
 keep if xcoord == 0 & ycoord == 0
-export delimited using badData.csv, replace
+export delimited using badData.csv, replace nolabel
 clear
 
 /* Commenting out this part until worked through geocoding issues.
