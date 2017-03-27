@@ -4,14 +4,27 @@ output: html_notebook
 ---
 
 # Dependencies
-```{r}
+
+```{r, warning=FALSE, message=FALSE}
 library(dplyr)    # data management
+library(ggplot2)  # plotting
 library(broom)    # tidy output
 library(Hmisc)    # spearmans rho correlations
-library(nortest)  # normality testing
-
 ```
 
+# Analysis Plan
+
+This notebook includes a-spatial statistics for three different areal units as a check against the modifable areal unit problem.
+
+All crime data are handled as rates per 1,000 residents. For wards and neighborhoods, barriers are normalized using square miles. They do not need to be normalized for the grids because each grid is 1,000 meters square (approximately the size of a Census Block Group).
+
+Population data have been interpolated (see Taylor's method note) from Census Tracts using ACS 2010-2015 5-year esimates.
+
+For each areal unit below, we:
+  * calculate crime rates and, if applicable, barrier rates,
+  * plot a histogram of the barrier variable (count or rate),
+  * test the normality of the barrier variable (count or rate),
+  * and calculate correlation coefficients comparing bariers to crime rates, race, and poverty.
 
 # Analysis by Grid Square
 
@@ -22,12 +35,29 @@ grids <- read.csv("STL_BARRIERS_Grids_UAA2017.csv", stringsAsFactors = FALSE)
 grids <- rename(grids, BarrierCount = BarrierCou)
 ```
 
+Create crime rate variables that gauge crime per grid square relative to the square's population:
+
+```{r}
+grids <- grids %>%
+  mutate(crimeRate = (crime2016/pop15)*1000) %>%
+  mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
+  mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000)
+```
+
+Histogram for main study variable:
+
+```{r}
+gridPlot <- ggplot(grids, aes(BarrierCount)) +
+  geom_histogram(binwidth = 1)
+gridPlot
+```
+
+
 Descriptive statistics for main study variable:
 
 ```{r}
 summary(grids$BarrierCount)
 ```
-
 
 Normality test of main study variable:
 
@@ -39,12 +69,24 @@ The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for
 
 ```{r}
 gridsCorr <- grids %>%
-  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, BarrierCount) %>%
   as.matrix()
 
 gridsResults <- tidy(rcorr(gridsCorr, type="spearman"))
 gridsResults
+```
 
+The main outcomes are the correlations between barrier counts and the crime and demographic variables. There are moderate, positive, statistically significant relationships between crime and barrier counts - the greater the number of barriers per grid square, the higher the crime rate generally is.
+
+You can see that relationship here:
+
+```{r}
+gridScatter <- ggplot(grids, aes(ucr1_4_Rate, BarrierCount)) +
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE) +
+  labs(x = "Violent Crime Rate per 1,000 Residents",
+       y = "Number of Barriers")
+gridScatter
 ```
 
 # Analysis by Ward
@@ -56,20 +98,40 @@ wards <- read.csv("STL_BARRIERS_Wards10_UAA2017.csv", stringsAsFactors = FALSE)
 wards <- rename(wards, BarrierCount = BarrierCou)
 ```
 
+Create crime rate variables that gauge crime per ward relative to the wards's population and a barrier rate that gauges the number of barriers per sq mile:
+
+```{r}
+wards <- wards %>%
+  mutate(crimeRate = (crime2016/pop15)*1000) %>%
+  mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
+  mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000) %>%
+  mutate(barrierRate = (BarrierCount/sqmile))
+```
+
+Histogram for main study variable:
+
+```{r}
+wardPlot <- ggplot(wards, aes(barrierRate)) +
+  geom_histogram(binwidth = 2)
+wardPlot
+```
+
 Descriptive statistics for main study variable:
 
 ```{r}
-summary(wards$BarrierCount)
+summary(wards$barrierRate)
 ```
 
 ```{r}
 wardsCorr <- wards %>%
-  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, barrierRate) %>%
   as.matrix()
 
 wardsResults <- cor(wardsCorr, method="kendall")
 wardsResults
 ```
+
+This analysis has generally similar findings to the grids analysis - there is a moderate (though a week moderate), positive relationship between the density of barriers per square mile and the crime rate. 
 
 # Analysis by Neighborhood
 
@@ -79,27 +141,52 @@ Read in raw data:
 nhood <- read.csv("STL_BARRIERS_Nhood_UAA2017.csv", stringsAsFactors = FALSE)
 ```
 
+Create crime rate variables that gauge crime per ward  relative to the wards's population:
+
+```{r}
+nhood <- nhood %>%
+  mutate(crimeRate = (crime2016/pop15)*1000) %>%
+  mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
+  mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000) %>%
+  mutate(barrierRate = (BarrierCount/sqmile))
+```
+
+Histogram for main study variable:
+
+```{r}
+nhoodPlot <- ggplot(nhood, aes(barrierRate)) +
+  geom_histogram(binwidth = 3)
+nhoodPlot
+```
+
 Descriptive statistics for main study variable:
 
 ```{r}
-summary(nhood$BarrierCount)
+summary(nhood$barrierRate)
 ```
-
-
 Normality test of main study variable:
 
 ```{r}
-qqnorm(nhood$BarrierCount); qqline(nhood$BarrierCount)
+qqnorm(nhood$barrierRate); qqline(nhood$barrierRate)
 ```
 
 The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for our correlation analysis:
 
 ```{r}
 nhoodCorr <- nhood %>%
-  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, barrierRate) %>%
   as.matrix()
 
-nhoodCorr <- tidy(rcorr(gridsCorr, type="spearman"))
+nhoodCorr <- tidy(rcorr(nhoodCorr, type="spearman"))
 nhoodCorr
-
 ```
+
+This analysis has generally similar findings to the grids analysis - there is a moderate, positive relationship between the density of barriers per square mile and the crime rate. These coefficients are just a bit larger in terms of effect size than the grid analysis.
+
+# Main Takeaways
+
+Regardless of how we conceptualize our areal units, we see a moderate, positive relationship between barrier density and crime rate. This relationship is weakest at the ward and strongest at the neighborhood, with the relationship at the grid level just a bit weaker than the neighborhood level.
+
+These findings run counter to the logic of the barriers, which suggests that barriers will decrease crime. 
+
+What they do not address, however, is the "island in the storm" phenomenon - are individual streets safter than the surroudning neighborhood if they have a barrier on them.
