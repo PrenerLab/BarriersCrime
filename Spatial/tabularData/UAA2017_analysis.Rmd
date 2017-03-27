@@ -1,0 +1,105 @@
+---
+title: "UAA2017_analysis"
+output: html_notebook
+---
+
+# Dependencies
+```{r}
+library(dplyr)    # data management
+library(broom)    # tidy output
+library(Hmisc)    # spearmans rho correlations
+library(nortest)  # normality testing
+
+```
+
+
+# Analysis by Grid Square
+
+Read in raw data:
+
+```{r}
+grids <- read.csv("STL_BARRIERS_Grids_UAA2017.csv", stringsAsFactors = FALSE)
+grids <- rename(grids, BarrierCount = BarrierCou)
+```
+
+Descriptive statistics for main study variable:
+
+```{r}
+summary(grids$BarrierCount)
+```
+
+
+Normality test of main study variable:
+
+```{r}
+qqnorm(grids$BarrierCount); qqline(grids$BarrierCount)
+```
+
+The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for our correlation analysis:
+
+```{r}
+gridsCorr <- grids %>%
+  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  as.matrix()
+
+gridsResults <- tidy(rcorr(gridsCorr, type="spearman"))
+gridsResults
+
+```
+
+# Analysis by Ward
+
+Read in raw data:
+
+```{r}
+wards <- read.csv("STL_BARRIERS_Wards10_UAA2017.csv", stringsAsFactors = FALSE)
+wards <- rename(wards, BarrierCount = BarrierCou)
+```
+
+Descriptive statistics for main study variable:
+
+```{r}
+summary(wards$BarrierCount)
+```
+
+```{r}
+wardsCorr <- wards %>%
+  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  as.matrix()
+
+wardsResults <- cor(wardsCorr, method="kendall")
+wardsResults
+```
+
+# Analysis by Neighborhood
+
+Read in raw data:
+
+```{r}
+nhood <- read.csv("STL_BARRIERS_Nhood_UAA2017.csv", stringsAsFactors = FALSE)
+```
+
+Descriptive statistics for main study variable:
+
+```{r}
+summary(nhood$BarrierCount)
+```
+
+
+Normality test of main study variable:
+
+```{r}
+qqnorm(nhood$BarrierCount); qqline(nhood$BarrierCount)
+```
+
+The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for our correlation analysis:
+
+```{r}
+nhoodCorr <- nhood %>%
+  select(crime2016, ucr1_4, ucr1_8, per_pov, per_blk, BarrierCount) %>%
+  as.matrix()
+
+nhoodCorr <- tidy(rcorr(gridsCorr, type="spearman"))
+nhoodCorr
+
+```
