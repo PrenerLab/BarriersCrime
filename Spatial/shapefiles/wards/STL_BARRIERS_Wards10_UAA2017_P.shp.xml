@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metadata xml:lang="en"><Esri><CreaDate>20170330</CreaDate><CreaTime>22023200</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\Data Management Tools.tbx\CalculateField" Date="20170330" Time="220232">CalculateField STL_BARRIERS_Wards10_UAA2017_P barr_mi "[BarrierCou] / [sq_mi]" VB #</Process></lineage></DataProperties></Esri></metadata>
