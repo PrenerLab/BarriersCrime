@@ -8,6 +8,7 @@ output: html_notebook
 ```{r, warning=FALSE, message=FALSE}
 library(dplyr)    # data management
 library(ggplot2)  # plotting
+library(RColorBrewer)
 library(broom)    # tidy output
 library(Hmisc)    # spearmans rho correlations
 ```
@@ -41,14 +42,29 @@ Create crime rate variables that gauge crime per grid square relative to the squ
 grids <- grids %>%
   mutate(crimeRate = (crime2016/pop15)*1000) %>%
   mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
-  mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000)
+  mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000) %>%
+  mutate(propRate = (propCrime1/pop15)*1000) %>%
+  mutate(gridGTZero = ifelse(BarrierCount > 0, TRUE, FALSE))
+```
+
+Number of grid squares with and without barriers:
+
+```{r}
+summary(grids$gridGTZero)
 ```
 
 Histogram for main study variable:
 
 ```{r}
-gridPlot <- ggplot(grids, aes(BarrierCount)) +
-  geom_histogram(binwidth = 1)
+gridPlot <- ggplot(grids, aes(BarrierCount, fill = gridGTZero)) +
+  geom_histogram(binwidth = 1) + 
+  scale_fill_brewer(palette="Set1", 
+                    labels = c("No (68%)", "Yes (32%)"),
+                      guide = guide_legend(title = "Barriers \nPresent?")) +
+  labs(title = "Distribution of Barriers per Grid Square",
+       x = "Barriers per Grid Square",
+       y = "Frequency")
+ggsave("gridPlot.png", width = 7, height = 4.5, units = "in")
 gridPlot
 ```
 
@@ -69,10 +85,11 @@ The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for
 
 ```{r}
 gridsCorr <- grids %>%
-  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, BarrierCount) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, propRate, per_pov, per_blk, BarrierCount) %>%
   as.matrix()
 
 gridsResults <- tidy(rcorr(gridsCorr, type="spearman"))
+gridsResults$p.value <- format(gridsResults$p.value, scientific = FALSE)
 gridsResults
 ```
 
@@ -88,6 +105,8 @@ gridScatter <- ggplot(grids, aes(ucr1_4_Rate, BarrierCount)) +
        y = "Number of Barriers")
 gridScatter
 ```
+
+
 
 # Analysis by Ward
 
@@ -105,6 +124,7 @@ wards <- wards %>%
   mutate(crimeRate = (crime2016/pop15)*1000) %>%
   mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
   mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000) %>%
+  mutate(propRate = (propCrime1/pop15)*1000) %>%
   mutate(barrierRate = (BarrierCount/sqmile))
 ```
 
@@ -124,7 +144,7 @@ summary(wards$barrierRate)
 
 ```{r}
 wardsCorr <- wards %>%
-  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, barrierRate) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, propRate, per_pov, per_blk, barrierRate) %>%
   as.matrix()
 
 wardsResults <- cor(wardsCorr, method="kendall")
@@ -139,6 +159,7 @@ Read in raw data:
 
 ```{r}
 nhood <- read.csv("STL_BARRIERS_Nhood_UAA2017.csv", stringsAsFactors = FALSE)
+nhood <- rename(nhood, BarrierCount = BarrierCou)
 ```
 
 Create crime rate variables that gauge crime per ward  relative to the wards's population:
@@ -148,6 +169,7 @@ nhood <- nhood %>%
   mutate(crimeRate = (crime2016/pop15)*1000) %>%
   mutate(ucr1_4_Rate = (ucr1_4/pop15)*1000) %>%
   mutate(ucr1_8_Rate = (ucr1_8/pop15)*1000) %>%
+  mutate(propRate = (propCrime1/pop15)*1000) %>%
   mutate(barrierRate = (BarrierCount/sqmile))
 ```
 
@@ -174,10 +196,11 @@ The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for
 
 ```{r}
 nhoodCorr <- nhood %>%
-  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, per_pov, per_blk, barrierRate) %>%
+  select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, propRate, per_pov, per_blk, barrierRate) %>%
   as.matrix()
 
 nhoodCorr <- tidy(rcorr(nhoodCorr, type="spearman"))
+nhoodCorr$p.value <- format(nhoodCorr$p.value, scientific = FALSE)
 nhoodCorr
 ```
 
