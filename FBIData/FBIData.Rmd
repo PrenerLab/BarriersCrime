@@ -1,0 +1,310 @@
+---
+title: "FBI Data"
+output: html_notebook
+---
+
+# Dependencies
+
+```{r, warning=FALSE, message=FALSE}
+library(readxl)       # data import
+library(dplyr)        # data management
+library(ggplot2)      # plotting
+library(RColorBrewer) # color palattes
+library(broom)        # tidy output
+library(purrr)        # functional programming
+```
+
+# Supress Readxl Output
+
+This defines a new function (`quiet_read()`) that supresses output while invoking the `read_excel()` function. 
+
+```{r}
+quiet_read <- purrr::quietly(readxl::read_excel)
+```
+
+The workaround used here was originally posted on a [GitHub issue](https://github.com/tidyverse/readxl/issues/82) for this behavior. Use the `quiet_read()` function with the same structure as you would normally use with `read_excel()`. After the close parentheses, add `$result`:
+
+```r
+myData <- quiet_read("filename.xls", sheet = 1, skip = 3)$result
+```
+
+# Read in Raw Data
+
+The primary sets of raw data were downloaded from the [FBI's UCR data tool](https://www.ucrdatatool.gov). They cover the years 1985-2014, the wideset range of years that were available as of 01 Apr 2017. `csv` files were created that contained both violent and property crime counts for each city. The `csv` portion of each file was copied-and-pasted from the FBI's website into a plain-text document and saved with the `csv` file extension.
+
+Data for 2015 were downloaded from the [FBI's 2015 Crime in the U.S. Report](https://ucr.fbi.gov/crime-in-the-u.s/2015/crime-in-the-u.s.-2015/tables/table-8/table_8_offenses_known_to_law_enforcement_by_state_by_city_2015.xls/view). These data have not been edited other than changing the default file names. They contain data for all cities in each of the associated states. The current release of FBI does not include 2015 data on Newark, NJ.
+
+```{r}
+# St. Louis
+stLouis <- read.csv("rawFBIData-STL.csv", stringsAsFactors = FALSE)
+stLouis15 <- quiet_read("rawFBIData-STL-2015.xls", sheet = 1, col_names = TRUE, 
+                        col_types = NULL, na = "", skip = 4)$result
+
+# Cincinnati, OH
+cincinnati <- read.csv("rawFBIData-CVG.csv", stringsAsFactors = FALSE)
+cincinnati15 <- quiet_read("rawFBIData-CVG-2015.xls", sheet = 1, col_names = TRUE, 
+                        col_types = NULL, na = "", skip = 4)$result
+
+# Newark, NJ
+newark <- read.csv("rawFBIData-EWR.csv", stringsAsFactors = FALSE)
+# newark15 <- quiet_read("rawFBIData-EWR-2015.xls", sheet = 1, col_names = TRUE, 
+#                        col_types = NULL, na = "", skip = 4)$result
+
+# Baltimore, MD
+baltimore <- read.csv("rawFBIData-BAL.csv", stringsAsFactors = FALSE)
+baltimore15 <- quiet_read("rawFBIData-BAL-2015.xls", sheet = 1, col_names = TRUE, 
+                        col_types = NULL, na = "", skip = 4)$result
+
+# Detroit, MI
+detroit <- read.csv("rawFBIData-DTW.csv", stringsAsFactors = FALSE)
+detroit15 <- quiet_read("rawFBIData-DTW-2015.xls", sheet = 1, col_names = TRUE, 
+                        col_types = NULL, na = "", skip = 4)$result
+```
+
+Not all cities are complete for each year. For intance, Cincinnati is missing data for 1997 and 1998. Baltimore is missing data for 1999, and Newark is missing data for 2015.
+
+# Initial Data Cleaning - 1984-2014 Data
+
+For each city, key variables (murders and violent crimes) are renamed and then those variables, population, and year are filtered out.
+
+```{r}
+stLouis <- stLouis %>%
+  rename(violentTotal = Violent.crime.total) %>%
+  rename(murder = Murder.and.nonnegligent.Manslaughter) %>%
+  select(Year, Population, violentTotal, murder)
+
+cincinnati <- cincinnati %>%
+  rename(violentTotal = Violent.crime.total) %>%
+  rename(murder = Murder.and.nonnegligent.Manslaughter) %>%
+  select(Year, Population, violentTotal, murder)
+
+newark <- newark %>%
+  rename(violentTotal = Violent.crime.total) %>%
+  rename(murder = Murder.and.nonnegligent.Manslaughter) %>%
+  select(Year, Population, violentTotal, murder)
+
+baltimore <- baltimore %>%
+  rename(violentTotal = Violent.crime.total) %>%
+  rename(murder = Murder.and.nonnegligent.Manslaughter) %>%
+  select(Year, Population, violentTotal, murder)
+
+detroit <- detroit %>%
+  rename(violentTotal = Violent.crime.total) %>%
+  rename(murder = Murder.and.nonnegligent.Manslaughter) %>%
+  select(Year, Population, violentTotal, murder)
+```
+
+# Initial Cleaning - 2015 Data
+
+Each of the city's 2015 datasets are created with matching variables from the state tables. The code for Newark is retained but commented out.
+
+```{r}
+stLouis15 <- stLouis15 %>%
+  rename(violentTotal = `Violent
+crime`) %>%
+  rename(murder = `Murder and
+nonnegligent
+manslaughter`) %>%
+  filter(City == "St. Louis") %>%
+  mutate(Year = 2015) %>%
+  select(Year, Population, violentTotal, murder)
+
+cincinnati15 <- cincinnati15 %>%
+  rename(violentTotal = `Violent
+crime`) %>%
+  rename(murder = `Murder and
+nonnegligent
+manslaughter`) %>%
+  filter(City == "Cincinnati") %>%
+  mutate(Year = 2015) %>%
+  select(Year, Population, violentTotal, murder)
+
+# newark15 <- newark15 %>%
+#  rename(violentTotal = `Violent
+#crime`) %>%
+#  rename(murder = `Murder and
+#nonnegligent
+#manslaughter`) %>%
+#  filter(City == "Newark") %>%
+#  mutate(Year = 2015) %>%
+#  select(Year, Population, violentTotal, murder)
+
+baltimore15 <- baltimore15 %>%
+  rename(violentTotal = `Violent
+crime`) %>%
+  rename(murder = `Murder and
+nonnegligent
+manslaughter`) %>%
+  filter(City == "Baltimore") %>%
+  mutate(Year = 2015) %>%
+  select(Year, Population, violentTotal, murder)
+
+detroit15 <- detroit15 %>%
+  rename(violentTotal = `Violent
+crime`) %>%
+  rename(murder = `Murder and
+nonnegligent
+manslaughter`) %>%
+  filter(City == "Detroit") %>%
+  mutate(Year = 2015) %>%
+  select(Year, Population, violentTotal, murder)
+```
+
+# Combine 2015 Data with 1985-2014 Data
+
+The 2015 data is appended to the 1985-2014 data frame for each table. The 2015 data is then removed from the environment.
+
+```{r}
+stLouis <- bind_rows(stLouis, stLouis15)
+rm(stLouis15)
+
+cincinnati <- bind_rows(cincinnati, cincinnati15)
+rm(cincinnati15)
+
+# newark <- bind_rows(newark, newark15)
+# rm(newark15)
+
+baltimore <- bind_rows(baltimore, baltimore15)
+rm(baltimore15)
+
+detroit <- bind_rows(detroit, detroit15)
+rm(detroit15)
+```
+
+
+# Calculate Crime Rates and Add City Variable
+
+For each city, an ID variable is created with a three letter abbreviation. Crime rates per 100,000 are calculated for both murders and violent crimes.
+
+```{r}
+stLouis <- stLouis %>%
+  mutate(city = "STL") %>%
+  mutate(violentRate = (violentTotal/Population)*100000) %>%
+  mutate(murderRate = (murder/Population)*100000)
+
+cincinnati <- cincinnati %>%
+  mutate(city = "CVG") %>%
+  mutate(violentRate = (violentTotal/Population)*100000) %>%
+  mutate(murderRate = (murder/Population)*100000)
+
+newark <- newark %>%
+  mutate(city = "EWR") %>%
+  mutate(violentRate = (violentTotal/Population)*100000) %>%
+  mutate(murderRate = (murder/Population)*100000)
+
+baltimore <- baltimore %>%
+  mutate(city = "BAL") %>%
+  mutate(violentRate = (violentTotal/Population)*100000) %>%
+  mutate(murderRate = (murder/Population)*100000)
+
+detroit <- detroit %>%
+  mutate(city = "DTW") %>%
+  mutate(violentRate = (violentTotal/Population)*100000) %>%
+  mutate(murderRate = (murder/Population)*100000)
+```
+
+# Combine Datasets
+
+Each city's data is appended together into a single data frame. The individual data frames are then removed from the environment. 
+
+```{r}
+cityMurder <- bind_rows(stLouis, newark)
+rm(stLouis)
+rm(newark)
+
+cityMurder <- bind_rows(cityMurder, cincinnati)
+rm(cincinnati)
+
+cityMurder <- bind_rows(cityMurder, baltimore)
+rm(baltimore)
+
+cityMurder <- bind_rows(cityMurder, detroit)
+rm(detroit)
+```
+
+# Murder Rate Plots
+
+St. Louis, Baltimore, and Detroit:
+
+```{r}
+murderPlot <- cityMurder %>%
+  filter(city == "BAL" | city == "DTW" | city == "STL") %>%
+  ggplot(aes(x = Year, y = murderRate, group = city)) +
+    geom_line(aes(colour = city)) + 
+    scale_y_continuous(limits = c(0, 70)) +
+    scale_x_continuous(breaks = c(1985, 1990, 1995, 2000, 2005, 2010, 2015)) +
+    scale_colour_brewer(palette="Set1", 
+                      labels = c("Baltimore", "Detroit", "St. Louis"),
+                      guide = guide_legend(title = "City")) +
+    labs(title = "Murder Rates for St. Louis and Select Rust Belt Cities", 
+         subtitle = "1985-2015",
+         y = "Murder Rate per 100,000",
+         caption = "(Data via the FBI)")
+ggsave("murderPlot.png", width = 6.5, height = 4.75, units = "in")
+murderPlot
+```
+
+St. Louis, Cinncinati, and Newark:
+
+```{r}
+murderPlot2 <- cityMurder %>%
+  filter(city == "CVG" | city == "EWR" | city == "STL") %>%
+  ggplot(aes(x = Year, y = murderRate, group = city)) +
+    geom_line(aes(colour = city)) + 
+    scale_y_continuous(limits = c(0, 70)) +
+    scale_x_continuous(breaks = c(1985, 1990, 1995, 2000, 2005, 2010, 2015)) +
+    scale_colour_brewer(palette="Set1", 
+                      labels = c("Cincinnati", "Newark", "St. Louis"),
+                      guide = guide_legend(title = "City")) +
+    labs(title = "Murder Rates for St. Louis and Select Rust Belt Cities", 
+         subtitle = "1985-2015*",
+         y = "Murder Rate per 100,000",
+         caption = "(Data via the FBI; * - 2015 data for Newark not available)")
+ggsave("murderPlot2.png", width = 6.5, height = 4.75, units = "in")
+murderPlot2
+```
+
+# Violent Crime Rate Plots
+
+```{r}
+violentPlot <- cityMurder %>%
+  filter(!is.na(violentRate)) %>%
+  filter(city == "BAL" | city == "DTW" | city == "STL") %>%
+  ggplot(aes(x = Year, y = violentRate, group = city)) +
+    geom_line(aes(colour = city)) + 
+    scale_y_continuous(limits = c(0, 4000)) +
+    scale_x_continuous(breaks = c(1985, 1990, 1995, 2000, 2005, 2010, 2015)) +
+    scale_colour_brewer(palette="Set1", 
+                      labels = c("Baltimore", "Detroit", "St. Louis"),
+                      guide = guide_legend(title = "City")) +
+    labs(title = "Violent Crime Rates for St. Louis and Select Cities", 
+         subtitle = "1985-2015",
+         y = "Violent Crime Rate per 100,000",
+         caption = "(Data via the FBI)")
+ggsave("violentPlot.png", width = 6.5, height = 4.75, units = "in")
+violentPlot
+```
+
+```{r}
+violentPlot2 <- cityMurder %>%
+  filter(!is.na(violentRate)) %>%
+  filter(city == "CVG" | city == "EWR" | city == "STL") %>%
+  ggplot(aes(x = Year, y = violentRate, group = city)) +
+    geom_line(aes(colour = city)) + 
+    scale_y_continuous(limits = c(0, 4000)) +
+    scale_x_continuous(breaks = c(1985, 1990, 1995, 2000, 2005, 2010, 2015)) +
+    scale_colour_brewer(palette="Set1", 
+                      labels = c("Cincinnati", "Newark", "St. Louis"),
+                      guide = guide_legend(title = "City")) +
+    labs(title = "Violent Crime Rates for St. Louis and Select Cities", 
+         subtitle = "1985-2015*",
+         y = "Violent Crime Rate per 100,000",
+         caption = "(Data via the FBI; * - 2015 data for Newark not available)")
+ggsave("violentPlot2.png", width = 6.5, height = 4.75, units = "in")
+violentPlot2
+```
+
+# Analysis
+St. Louis does not compare well to current trends with similarly sized rust belt cities (Newark and Cincinnati). Though Newark's crime rate during the late 1980s and the 1990s was comparable, it has dropped off substantially from the pace St. Louis has remained on throughout the 2000s.
+
+Both Detroit and Baltimore - cities with twice the population of St. Louis - are better reference groups for crime rates. Both cities have comparable trends in violent crime rates, with Baltimore having a similarly timed recent upswing in violent crime. Though the variance in murders for St. Louis is much larger than for Baltimore or Detroit, the patters are relatively simiarl. Like violent crime, Baltimore has a similarly timed recent upswing in murders. 
