@@ -57,17 +57,17 @@ Histogram for main study variable:
 
 ```{r}
 gridPlot <- ggplot(grids, aes(BarrierCount, fill = gridGTZero)) +
-  geom_histogram(binwidth = 1) + 
+  geom_histogram(binwidth = 1, color="black") + 
   scale_fill_brewer(palette="Set1", 
                     labels = c("No (68%)", "Yes (32%)"),
-                      guide = guide_legend(title = "Barriers \nPresent?")) +
+                    guide = guide_legend(title = "Barriers \nPresent?")) +
   labs(title = "Distribution of Barriers per Grid Square",
+       subtitle = "n = 215 grid squares",
        x = "Barriers per Grid Square",
        y = "Frequency")
-ggsave("gridPlot.png", width = 7, height = 4.5, units = "in")
+ggsave("gridPlot.png", width = 6.5, height = 4.75, units = "in")
 gridPlot
 ```
-
 
 Descriptive statistics for main study variable:
 
@@ -84,13 +84,15 @@ qqnorm(grids$BarrierCount); qqline(grids$BarrierCount)
 The q-q plot shows a highly skewed distirubtion, so we'll use spearman's rho for our correlation analysis:
 
 ```{r}
-gridsCorr <- grids %>%
+gridCorr <- grids %>%
   select(crimeRate, ucr1_4_Rate, ucr1_8_Rate, propRate, per_pov, per_blk, BarrierCount) %>%
   as.matrix()
 
-gridsResults <- tidy(rcorr(gridsCorr, type="spearman"))
-gridsResults$p.value <- format(gridsResults$p.value, scientific = FALSE)
-gridsResults
+gridResults <- tidy(rcorr(gridCorr, type="spearman"))
+gridResults$p.value <- format(gridResults$p.value, scientific = FALSE)
+gridResults <- filter(gridResults, column2 == "BarrierCount")
+write.csv(gridResults, "gridResults.csv")
+gridResults
 ```
 
 The main outcomes are the correlations between barrier counts and the crime and demographic variables. There are moderate, positive, statistically significant relationships between crime and barrier counts - the greater the number of barriers per grid square, the higher the crime rate generally is.
@@ -98,14 +100,80 @@ The main outcomes are the correlations between barrier counts and the crime and 
 You can see that relationship here:
 
 ```{r}
-gridScatter <- ggplot(grids, aes(ucr1_4_Rate, BarrierCount)) +
-  geom_point() + 
-  geom_smooth(method=lm, se=FALSE) +
-  labs(x = "Violent Crime Rate per 1,000 Residents",
-       y = "Number of Barriers")
-gridScatter
+gridViolent <- ggplot(grids, aes(ucr1_4_Rate, BarrierCount)) +
+  geom_point(color = "#e41a1c") + 
+  geom_point(shape = 1, color = "black") +
+  geom_smooth(method=lm, se=FALSE, color = "#377eb8") +
+  labs(title = "Relationship Between Barrier Density and Violent Crime in St. Louis", 
+       subtitle = "2016 Data for Murders, Rapes, Robberies, and Aggrevated Assaults",
+       x = "Violent Crime Rate per 1,000 Residents",
+       y = "Number of Barriers",
+       caption = "(Data via the SLMPD)")
+ggsave("gridViolent.png", width = 6.5, height = 4.75, units = "in")
+gridViolent
 ```
 
+```{r}
+gridProp <- ggplot(grids, aes(propRate, BarrierCount)) +
+  geom_point(color = "#e41a1c") + 
+  geom_point(shape = 1, color = "black") +
+  geom_smooth(method=lm, se=FALSE, color = "#377eb8") +
+  labs(title = "Relationship Between Barrier Density and Property Crime in St. Louis", 
+       subtitle = "2016 Data for Burglaries, Larcenies, Motor Vehicle Larcenies, and Vandalism",
+       x = "Property Crime Rate per 1,000 Residents",
+       y = "Number of Barriers",
+       caption = "(Data via the SLMPD)")
+ggsave("gridProp.png", width = 6.5, height = 4.75, units = "in")
+gridProp
+```
+
+Descriptive statistics output:
+
+```{r}
+a <- tidy(summary(grids$BarrierCount))
+a <- mutate(a, variable = "barrier count")
+
+b <- tidy(summary(grids$crimeRate))
+b <- mutate(b, variable = "crime rate")
+
+c <- tidy(summary(grids$ucr1_4_Rate))
+c <- mutate(c, variable = "violent crimes")
+
+d <- tidy(summary(grids$ucr1_8_Rate))
+d <- mutate(d, variable = "part 1 crimes")
+
+e <- tidy(summary(grids$propRate))
+e <- mutate(e, variable = "property crimes")
+
+f <- tidy(summary(grids$per_pov))
+f <- mutate(f, variable = "poverty rate")
+
+g <- tidy(summary(grids$per_blk))
+g <- mutate(g, variable = "percent black")
+
+
+gridStats <- bind_rows(a, b)
+rm(a)
+rm(b)
+
+gridStats <- bind_rows(gridStats, c)
+rm(c)
+
+gridStats <- bind_rows(gridStats, d)
+rm(d)
+
+gridStats <- bind_rows(gridStats, e)
+rm(e)
+
+gridStats <- bind_rows(gridStats, f)
+rm(f)
+
+gridStats <- bind_rows(gridStats, g)
+rm(g)
+
+gridStats <- select(gridStats, variable, minimum, q1, median, mean, q3, maximum)
+write.csv(gridStats, "gridStats.csv")
+```
 
 
 # Analysis by Ward
